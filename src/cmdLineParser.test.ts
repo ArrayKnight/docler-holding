@@ -8,7 +8,7 @@ describe('cmdLineParser', () => {
     }
 
     it('should parse nothing', () => {
-        const inputs = ['', '--', ' node']
+        const inputs = ['', '     ', '-', '--', '-- foo - --bar']
 
         inputs.forEach((input) => {
             expect(cmdLineParser(input), JSON.stringify({ input })).toEqual(
@@ -57,7 +57,7 @@ describe('cmdLineParser', () => {
 
         expect(
             cmdLineParser(
-                'node foo bar -a -b=true --c=false --d="true" --e="false" -f="FooBar"',
+                `node foo bar -a -b=true --c=false --d="true" --e="false" -f="FooBar" --g="Test 'complex' quotes"`,
             ),
         ).toEqual({
             bin: 'node',
@@ -69,12 +69,23 @@ describe('cmdLineParser', () => {
                 d: 'true',
                 e: 'false',
                 f: 'FooBar',
+                g: "Test 'complex' quotes",
             },
         })
     })
 
-    it('should ignore commands after flags', () => {
-        expect(cmdLineParser('node --say=Hello World')).toEqual({
+    it('should convert flag keys to camel case', () => {
+        expect(cmdLineParser('prettier --end-of-line=CLRF')).toEqual({
+            ...output,
+            bin: 'prettier',
+            flags: {
+                endOfLine: 'CLRF',
+            },
+        })
+    })
+
+    it('should stop parsing after out of order command', () => {
+        expect(cmdLineParser('node --say=Hello world --ignored=true')).toEqual({
             ...output,
             bin: 'node',
             flags: {
