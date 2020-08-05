@@ -1,7 +1,11 @@
-import { cmdLineParser, ParserOutput } from './cmdLineParser'
+import {
+    cmdLineParser,
+    cmdLineParserRegEx,
+    ParserOutput,
+} from './cmdLineParser'
 
 describe('cmdLineParser', () => {
-    const output: ParserOutput = {
+    const empty: ParserOutput = {
         bin: '',
         commands: [],
         flags: {},
@@ -11,86 +15,161 @@ describe('cmdLineParser', () => {
         const inputs = ['', '     ', '-', '--', '-- foo - --bar']
 
         inputs.forEach((input) => {
-            expect(cmdLineParser(input), JSON.stringify({ input })).toEqual(
-                output,
-            )
+            expect(
+                cmdLineParser(input),
+                JSON.stringify({ input, output: empty, regex: false }),
+            ).toEqual(empty)
+            expect(
+                cmdLineParserRegEx(input),
+                JSON.stringify({ input, output: empty, regex: true }),
+            ).toEqual(empty)
         })
     })
 
     it('should parse bin', () => {
-        expect(cmdLineParser('node')).toEqual({
-            ...output,
+        const input = 'node'
+        const output = {
+            ...empty,
             bin: 'node',
-        })
+        }
+
+        expect(cmdLineParser(input)).toEqual(output)
+        expect(cmdLineParserRegEx(input)).toEqual(output)
     })
 
     it('should parse commands', () => {
-        expect(cmdLineParser('npm install')).toEqual({
-            ...output,
-            bin: 'npm',
-            commands: ['install'],
-        })
+        const pairs: Array<[string, ParserOutput]> = [
+            [
+                'npm install',
+                {
+                    ...empty,
+                    bin: 'npm',
+                    commands: ['install'],
+                },
+            ],
+            [
+                'docker init run',
+                {
+                    ...empty,
+                    bin: 'docker',
+                    commands: ['init', 'run'],
+                },
+            ],
+        ]
 
-        expect(cmdLineParser('docker init run')).toEqual({
-            ...output,
-            bin: 'docker',
-            commands: ['init', 'run'],
+        pairs.forEach(([input, output]) => {
+            expect(
+                cmdLineParser(input),
+                JSON.stringify({ input, output, regex: false }),
+            ).toEqual(output)
+            expect(
+                cmdLineParserRegEx(input),
+                JSON.stringify({ input, output, regex: true }),
+            ).toEqual(output)
         })
     })
 
     it('should parse flags', () => {
-        expect(cmdLineParser('jest --silent')).toEqual({
-            ...output,
-            bin: 'jest',
-            flags: {
-                silent: true,
-            },
-        })
-
-        expect(cmdLineParser('tsc -config=tsconfig.json')).toEqual({
-            ...output,
-            bin: 'tsc',
-            flags: {
-                config: 'tsconfig.json',
-            },
-        })
-
-        expect(
-            cmdLineParser(
+        const pairs: Array<[string, ParserOutput]> = [
+            [
+                'jest --silent',
+                {
+                    ...empty,
+                    bin: 'jest',
+                    flags: {
+                        silent: true,
+                    },
+                },
+            ],
+            [
+                'tsc -config=tsconfig.json',
+                {
+                    ...empty,
+                    bin: 'tsc',
+                    flags: {
+                        config: 'tsconfig.json',
+                    },
+                },
+            ],
+            [
                 `node foo bar -a -b=true --c=false --d="true" --e="false" -f="FooBar" --g="Test 'complex' quotes"`,
-            ),
-        ).toEqual({
-            bin: 'node',
-            commands: ['foo', 'bar'],
-            flags: {
-                a: true,
-                b: true,
-                c: false,
-                d: 'true',
-                e: 'false',
-                f: 'FooBar',
-                g: "Test 'complex' quotes",
-            },
+                {
+                    bin: 'node',
+                    commands: ['foo', 'bar'],
+                    flags: {
+                        a: true,
+                        b: true,
+                        c: false,
+                        d: 'true',
+                        e: 'false',
+                        f: 'FooBar',
+                        g: "Test 'complex' quotes",
+                    },
+                },
+            ],
+        ]
+
+        pairs.forEach(([input, output]) => {
+            expect(
+                cmdLineParser(input),
+                JSON.stringify({ input, output, regex: false }),
+            ).toEqual(output)
+            expect(
+                cmdLineParserRegEx(input),
+                JSON.stringify({ input, output, regex: true }),
+            ).toEqual(output)
         })
     })
 
     it('should convert flag keys to camel case', () => {
-        expect(cmdLineParser('prettier --end-of-line=CLRF')).toEqual({
-            ...output,
-            bin: 'prettier',
-            flags: {
-                endOfLine: 'CLRF',
-            },
+        const pairs: Array<[string, ParserOutput]> = [
+            [
+                'prettier --end-of-line=CLRF',
+                {
+                    ...empty,
+                    bin: 'prettier',
+                    flags: {
+                        endOfLine: 'CLRF',
+                    },
+                },
+            ],
+        ]
+
+        pairs.forEach(([input, output]) => {
+            expect(
+                cmdLineParser(input),
+                JSON.stringify({ input, output, regex: false }),
+            ).toEqual(output)
+            expect(
+                cmdLineParserRegEx(input),
+                JSON.stringify({ input, output, regex: true }),
+            ).toEqual(output)
         })
     })
 
     it('should stop parsing after out of order command', () => {
-        expect(cmdLineParser('node --say=Hello world --ignored=true')).toEqual({
-            ...output,
-            bin: 'node',
-            flags: {
-                say: 'Hello',
-            },
+        const pairs: Array<[string, ParserOutput]> = [
+            [
+                'node --say=Hello world --ignored=true',
+                {
+                    ...empty,
+                    bin: 'node',
+                    flags: {
+                        say: 'Hello',
+                    },
+                },
+            ],
+        ]
+
+        pairs.forEach(([input, output]) => {
+            expect(
+                cmdLineParser(input),
+                JSON.stringify({ input, output, regex: false }),
+            ).toEqual(output)
+            expect(
+                cmdLineParserRegEx(input),
+                JSON.stringify({ input, output, regex: true }),
+            ).toEqual(output)
         })
     })
 })

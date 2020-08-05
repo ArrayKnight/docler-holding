@@ -145,6 +145,75 @@ export function cmdLineParser(input: string): ParserOutput {
     return output
 }
 
+export function cmdLineParserRegEx(input: string): ParserOutput {
+    const output: ParserOutput = {
+        bin: '',
+        commands: [],
+        flags: {},
+    }
+
+    input = input.trim()
+
+    if (!input) {
+        return output
+    }
+
+    const termsRegEx = /(?:^([a-z][a-z0-9-_]*[a-z0-9]|[a-z0-9]))|(?:\s+([a-z][a-z0-9-_]*[a-z0-9]|[a-z0-9]+))|(?:\s+-{1,2}([a-z][a-z0-9-_]*[a-z0-9]|[a-z0-9]+)(?:=(?:"([^"]+)"|'([^']+)'|([^\s]+)))?)/gi
+    let parsingFlags = false
+    let match
+
+    while ((match = termsRegEx.exec(input))) {
+        const [
+            ,
+            bin,
+            command,
+            flag,
+            doubleQuotedValue,
+            singleQuotedValue,
+            unquotedValue,
+        ] = match
+
+        parsingFlags = parsingFlags || !!flag
+
+        if (!output.bin) {
+            if (bin) {
+                output.bin = bin
+            }
+        } else {
+            if (!parsingFlags) {
+                if (command) {
+                    output.commands.push(command)
+                } else {
+                    break
+                }
+            } else {
+                if (flag) {
+                    const isQuoted = !!doubleQuotedValue || !!singleQuotedValue
+                    const value =
+                        doubleQuotedValue ||
+                        singleQuotedValue ||
+                        unquotedValue ||
+                        true
+                    const isTrue = value === 'true'
+                    const isFalse = value === 'false'
+
+                    output.flags[toCamelCase(flag)] = isQuoted
+                        ? value
+                        : isTrue
+                        ? true
+                        : isFalse
+                        ? false
+                        : value
+                } else {
+                    break
+                }
+            }
+        }
+    }
+
+    return output
+}
+
 export function isAlphaNumeric(input: string): boolean {
     return isLetter(input) || isNumber(input)
 }
