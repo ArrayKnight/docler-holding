@@ -23,4 +23,6 @@ Given more time, there are several updates/changes that should be made to increa
 
 My initial version, which was submitted in the timed quiz, took the approach of using RegEx to pattern match the different terms to be parsed. I didn't end up having time to handle the optional quotes around flag values. I just wanted to show a different approach for fun.
 
+I've gone ahead and added in an updated version of my RegEx approach as well. The pro is that the logic is drastically simpler, however, the con is that RegEx are difficult to read/maintain/debug especially for inexperienced developers.
+
 The instructions are all pulled from memory, so I might not be 100% accurate to the original quiz assignment.
