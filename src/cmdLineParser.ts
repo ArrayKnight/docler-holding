@@ -175,39 +175,26 @@ export function cmdLineParserRegEx(input: string): ParserOutput {
 
         parsingFlags = parsingFlags || !!flag
 
-        if (!output.bin) {
-            if (bin) {
-                output.bin = bin
-            }
-        } else {
-            if (!parsingFlags) {
-                if (command) {
-                    output.commands.push(command)
-                } else {
-                    break
-                }
-            } else {
-                if (flag) {
-                    const isQuoted = !!doubleQuotedValue || !!singleQuotedValue
-                    const value =
-                        doubleQuotedValue ||
-                        singleQuotedValue ||
-                        unquotedValue ||
-                        true
-                    const isTrue = value === 'true'
-                    const isFalse = value === 'false'
+        if (!output.bin && bin) {
+            output.bin = bin
+        } else if (output.bin && !parsingFlags && command) {
+            output.commands.push(command)
+        } else if (output.bin && flag) {
+            const isQuoted = !!doubleQuotedValue || !!singleQuotedValue
+            const value =
+                doubleQuotedValue || singleQuotedValue || unquotedValue || true
+            const isTrue = value === 'true'
+            const isFalse = value === 'false'
 
-                    output.flags[toCamelCase(flag)] = isQuoted
-                        ? value
-                        : isTrue
-                        ? true
-                        : isFalse
-                        ? false
-                        : value
-                } else {
-                    break
-                }
-            }
+            output.flags[toCamelCase(flag)] = isQuoted
+                ? value
+                : isTrue
+                ? true
+                : isFalse
+                ? false
+                : value
+        } else {
+            break
         }
     }
 
