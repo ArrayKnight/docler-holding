@@ -1,5 +1,5 @@
 export function toCamelCase(input: string): string {
-    return input.split(/[^a-z]/i).reduce((output, word) => {
+    return input.split(/[^a-z0-9]/i).reduce((output, word) => {
         if (!word) {
             return output
         }

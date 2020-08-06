@@ -19,6 +19,7 @@ describe('toCamelCase', () => {
             ['FOOBAR', 'foobar'],
             ['fooID', 'fooId'],
             ['fooBAR', 'fooBar'],
+            ['HAL 9000', 'hal9000'],
         ]
 
         pairs.forEach(([input, output]) => {
