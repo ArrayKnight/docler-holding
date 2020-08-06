@@ -158,7 +158,7 @@ export function cmdLineParserRegEx(input: string): ParserOutput {
         return output
     }
 
-    const termsRegEx = /(?:^([a-z][a-z0-9-_]*[a-z0-9]|[a-z0-9]))|(?:\s+([a-z][a-z0-9-_]*[a-z0-9]|[a-z0-9]+))|(?:\s+-{1,2}([a-z][a-z0-9-_]*[a-z0-9]|[a-z0-9]+)(?:=(?:"([^"]+)"|'([^']+)'|([^\s]+)))?)/gi
+    const termsRegEx = /(?:^([a-z]+(?:[a-z0-9-_]*[a-z0-9]+)?))|(?:\s+([a-z]+(?:[a-z0-9-_]*[a-z0-9]+)?))|(?:\s+-{1,2}([a-z]+(?:[a-z0-9-_]*[a-z0-9]+)?)(?:=(?:"([^"]+)"|'([^']+)'|([^\s]+)))?)/gi
     let parsingFlags = false
     let match
 
